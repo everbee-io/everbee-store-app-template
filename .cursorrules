@@ -1,0 +1,497 @@
+# EverBee Store App Template - AI Coding Assistant Instructions
+
+You are helping to build an app for the EverBee Store platform. This template provides a complete full-stack foundation with React frontend and Node.js backend.
+
+## Project Architecture
+
+**Frontend (Port 3000)**
+- React 18 + TypeScript + Vite
+- Tailwind CSS for styling
+- React Router for navigation
+- React Query for data fetching
+- Located in `/frontend`
+
+**Backend (Port 3001)**
+- Node.js + Express + TypeScript
+- Mongoose ODM with MongoDB
+- JWT authentication
+- EverBee Store API integration
+- Located in `/backend`
+
+## Tech Stack Details
+
+### Frontend
+- **Build Tool**: Vite (fast HMR, optimized builds)
+- **Styling**: Tailwind CSS with custom theme
+- **Routing**: React Router v6
+- **State**: Zustand (lightweight state management)
+- **API Calls**: Custom API client in `src/lib/api-client.ts`
+- **Auth**: Token stored in localStorage, auto-refresh logic
+
+### Backend
+- **Framework**: Express.js with TypeScript
+- **Database**: MongoDB via Mongoose ODM
+- **Validation**: Zod schemas
+- **Auth**: JWT tokens, OAuth with EverBee
+- **API Client**: Axios-based EverBee SDK wrapper
+
+## Code Patterns & Conventions
+
+### Frontend Patterns
+
+**1. API Calls - Always use the API client**
+```typescript
+// src/lib/api-client.ts exports a configured client
+import { api } from '@/lib/api-client'
+
+// In components
+const { data, isLoading } = useQuery({
+  queryKey: ['products'],
+  queryFn: () => api.products.list()
+})
+```
+
+**2. Pages Structure**
+```typescript
+// src/pages/Products/index.tsx
+export default function ProductsPage() {
+  // Fetch data
+  // Render UI
+  // Handle loading/error states
+}
+```
+
+**3. Components**
+```typescript
+// src/components/ProductCard.tsx
+interface ProductCardProps {
+  product: Product
+  onEdit?: (id: string) => void
+}
+
+export function ProductCard({ product, onEdit }: ProductCardProps) {
+  // Component logic
+}
+```
+
+**4. Routing**
+```typescript
+// src/App.tsx
+<Routes>
+  <Route path="/" element={<WelcomePage />} />
+  <Route path="/auth/login" element={<LoginPage />} />
+  <Route element={<ProtectedLayout />}>
+    <Route path="/dashboard" element={<DashboardPage />} />
+    <Route path="/products" element={<ProductsPage />} />
+  </Route>
+</Routes>
+```
+
+### Backend Patterns
+
+**1. Route Structure**
+```typescript
+// src/routes/products.ts
+import { Router } from 'express'
+import { authenticate } from '../middleware/auth'
+import * as ProductController from '../controllers/products'
+
+const router = Router()
+
+router.use(authenticate) // Protect all routes
+
+router.get('/', ProductController.list)
+router.post('/', ProductController.create)
+router.get('/:id', ProductController.get)
+router.patch('/:id', ProductController.update)
+
+export default router
+```
+
+**2. Controllers**
+```typescript
+// src/controllers/products.ts
+import { Request, Response } from 'express'
+import * as ProductService from '../services/products'
+
+export async function list(req: Request, res: Response) {
+  try {
+    const products = await ProductService.getProducts(req.user.storeId, req.query)
+    res.json({ data: products })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+```
+
+**3. Services (Business Logic)**
+```typescript
+// src/services/products.ts
+import { everbeeClient } from '../lib/everbee-client'
+import { Product } from '../models'
+
+export async function getProducts(storeId: string, filters: any) {
+  // Call EverBee API
+  const products = await everbeeClient.products.list(storeId, filters)
+  
+  // Optionally cache in local DB
+  // await Product.findOneAndUpdate({ everbeeId: ... }, data, { upsert: true })
+  
+  return products
+}
+```
+
+**4. EverBee API Integration**
+```typescript
+// src/lib/everbee-client.ts
+import axios from 'axios'
+
+class EverBeeClient {
+  async products.list(storeId: string, params?: any) {
+    const response = await axios.get(
+      'https://store-open-api.everbee.com/open_api/v1/products',
+      {
+        headers: {
+          'X-Access-Token': this.getAccessToken(),
+          'Store-Id': storeId
+        },
+        params
+      }
+    )
+    return response.data
+  }
+}
+```
+
+## EverBee Store API Integration
+
+### Authentication Flow
+1. User installs app → redirected with `token`, `store_id`, `user_id`
+2. Backend exchanges token for OAuth access token
+3. Store access token in database linked to store
+4. Use access token for all API calls
+5. Implement token refresh when expired
+
+### API Endpoints (All require X-Access-Token and Store-Id headers)
+
+**Products**
+- `GET /products` - List products
+- `POST /products` - Create product
+- `GET /products/:id` - Get product
+- `PATCH /products/:id` - Update product
+- `PATCH /products/bulk_operation` - Bulk update
+
+**Orders**
+- `GET /orders` - List orders
+- `POST /orders/:id/trackings` - Add tracking
+- `PATCH /orders/bulk_operation` - Bulk update status
+
+**Collections**
+- `GET /collections` - List collections
+- `POST /collections` - Create collection (automatic/manual)
+- `PATCH /collections/:id` - Update collection
+
+**Categories**
+- `GET /categories` - List all categories
+
+**Customers**
+- `GET /customers/:id` - Get customer
+- `POST /customers` - Create customer
+- `PUT /customers/:id` - Update customer
+
+**Attachments (Images)**
+- `POST /attachments` - Upload image (3 methods: signed_id, URL, blob)
+
+**Shipping Profiles**
+- `GET /shipping_profiles` - List profiles
+- `POST /shipping_profiles` - Create profile
+
+**Discounts**
+- `GET /discounts` - List discounts
+- `POST /discounts` - Create discount
+
+### Common Patterns
+
+**Creating a Product with Images**
+```typescript
+// 1. Upload images first
+const imageResponse = await api.attachments.create({
+  blob: {
+    filename: 'product.jpg',
+    byte_size: file.size,
+    checksum: md5(file),
+    content_type: file.type
+  }
+})
+
+// 2. Upload to presigned URL
+await axios.put(imageResponse.direct_upload.url, file, {
+  headers: imageResponse.direct_upload.headers
+})
+
+// 3. Create product with image signed_id
+await api.products.create({
+  name: 'My Product',
+  variants_attributes: [{
+    is_master: true,
+    price: 29.99,
+    image_attachment_ids: {
+      to_append: [{ signed_id: imageResponse.signed_id, position: 1 }]
+    }
+  }]
+})
+```
+
+## Database Schema (Mongoose)
+
+Models are defined in `backend/src/models/`. Each model has a corresponding TypeScript interface.
+
+```typescript
+// Store model — backend/src/models/Store.ts
+const storeSchema = new Schema({
+  storeId: { type: String, required: true, unique: true },
+  subdomain: { type: String, required: true },
+  accessToken: { type: String, required: true },
+  refreshToken: { type: String },
+  tokenExpiry: { type: Date },
+  storeName: { type: String },
+  ownerEmail: { type: String },
+}, { timestamps: true })
+
+// User model — backend/src/models/User.ts
+const userSchema = new Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String },
+  storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true },
+  everbeeUserId: { type: String },
+  role: { type: String, default: 'admin' },
+}, { timestamps: true })
+
+// Add more models in backend/src/models/ as needed
+```
+
+## File Organization
+
+### Frontend
+```
+src/
+├── pages/           # Page components
+├── components/      # Reusable components
+├── lib/
+│   ├── api-client.ts   # EverBee API client
+│   └── auth.ts         # Auth utilities
+├── hooks/           # Custom React hooks
+├── types/           # TypeScript types
+├── config/          # App configuration
+└── utils/           # Helper functions
+```
+
+### Backend
+```
+src/
+├── routes/          # Express routes
+├── controllers/     # Request handlers
+├── services/        # Business logic
+├── models/          # Mongoose models
+├── middleware/      # Auth, validation, errors
+├── lib/
+│   ├── everbee-client.ts  # EverBee API wrapper
+│   ├── mongoose.ts        # MongoDB connection
+│   └── jwt.ts             # JWT utilities
+└── types/           # TypeScript types
+```
+
+## Building Features - Step-by-Step
+
+When a user asks you to add a feature, follow this pattern:
+
+### 1. Understand the Request
+- What data is needed from EverBee API?
+- Does it need database storage?
+- Is authentication required?
+
+### 2. Backend First
+```typescript
+// a) Add route
+// src/routes/analytics.ts
+router.get('/sales', AnalyticsController.getSales)
+
+// b) Add controller
+// src/controllers/analytics.ts
+export async function getSales(req, res) {
+  const data = await AnalyticsService.getSalesData(req.user.storeId, req.query)
+  res.json({ data })
+}
+
+// c) Add service
+// src/services/analytics.ts
+export async function getSalesData(storeId, filters) {
+  // Fetch from EverBee API
+  const orders = await everbeeClient.orders.list(storeId, filters)
+  // Process data
+  return processedData
+}
+```
+
+### 3. Frontend Second
+```typescript
+// a) Add API client method
+// src/lib/api-client.ts
+async getSalesAnalytics(filters) {
+  return this.get('/analytics/sales', { params: filters })
+}
+
+// b) Create component
+// src/components/SalesChart.tsx
+export function SalesChart() {
+  const { data } = useQuery({
+    queryKey: ['sales'],
+    queryFn: () => api.getSalesAnalytics()
+  })
+  return <Chart data={data} />
+}
+
+// c) Add to page
+// src/pages/Analytics/index.tsx
+export default function AnalyticsPage() {
+  return <div><SalesChart /></div>
+}
+```
+
+## Common Tasks
+
+### Add a New Page
+1. Create `src/pages/NewPage/index.tsx`
+2. Add route in `src/App.tsx`
+3. Add navigation link in `src/components/Layout.tsx`
+
+### Add EverBee API Endpoint
+1. Add method to `backend/src/lib/everbee-client.ts`
+2. Create service in `backend/src/services/`
+3. Create controller in `backend/src/controllers/`
+4. Add route in `backend/src/routes/`
+5. Add to frontend API client `frontend/src/lib/api-client.ts`
+
+### Add Database Model
+1. Create a new file in `backend/src/models/ModelName.ts` with schema and interface
+2. Export it from `backend/src/models/index.ts`
+3. Import and use via `import { ModelName } from '../models'`
+4. No migrations needed — MongoDB is schema-flexible
+
+## Environment Variables
+
+### Required in Backend (.env)
+```bash
+MONGODB_URI=             # MongoDB Atlas connection string (mongodb+srv://...)
+EVERBEE_CLIENT_ID=       # From EverBee dashboard
+EVERBEE_CLIENT_SECRET=   # From EverBee dashboard
+EVERBEE_REDIRECT_URI=    # Your OAuth callback URL
+JWT_SECRET=              # Auto-generated by setup script
+PORT=3001
+FRONTEND_URL=http://localhost:3000
+```
+
+### Required in Frontend (.env)
+```bash
+VITE_API_URL=http://localhost:3001
+VITE_APP_NAME=My EverBee App
+```
+
+## Error Handling
+
+### Backend
+```typescript
+// All errors caught by middleware
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error'
+  })
+})
+```
+
+### Frontend
+```typescript
+// React Query handles errors
+const { data, error, isLoading } = useQuery({
+  queryKey: ['products'],
+  queryFn: () => api.products.list(),
+  onError: (error) => {
+    toast.error(error.message)
+  }
+})
+```
+
+## Testing
+
+- Backend: `npm run test` (Jest)
+- Frontend: `npm run test` (Vitest)
+- E2E: `npm run test:e2e` (Playwright)
+
+## When User Asks for Features
+
+**User: "Add a chart showing sales by product"**
+
+You should:
+1. Check if orders API is integrated ✅ (it is)
+2. Create backend route `/analytics/sales-by-product`
+3. Create service to fetch orders and aggregate by product
+4. Create frontend component using chart library (recharts)
+5. Add to analytics page
+
+**User: "Let users bulk upload products via CSV"**
+
+You should:
+1. Add multer middleware for file upload
+2. Create CSV parser service
+3. Create product creation queue/batch
+4. Add frontend file upload component
+5. Show progress indicator
+
+## Key Reminders
+
+1. **Always use the API client** - Never hardcode API URLs
+2. **Protect routes** - Use `authenticate` middleware
+3. **Handle errors** - Try/catch in async functions
+4. **Type everything** - Use TypeScript interfaces
+5. **Follow REST** - Use proper HTTP methods
+6. **Cache wisely** - Use React Query for frontend caching
+7. **Validate input** - Use Zod schemas on backend
+8. **Respect rate limits** - EverBee API has limits
+9. **Token refresh** - Implement automatic token renewal
+10. **Mobile responsive** - Use Tailwind's responsive classes
+
+## Commands Reference
+
+```bash
+# Setup
+npm run setup            # Interactive setup wizard (first time)
+
+# Development
+npm run dev              # Start both servers
+npm run dev:frontend     # Frontend only
+npm run dev:backend      # Backend only
+
+# Database
+npm run db:seed          # Seed demo data
+
+# Build
+npm run build            # Build both
+npm run build:frontend   # Build frontend
+npm run build:backend    # Build backend
+
+# Deploy
+npm run deploy           # Deploy frontend to Vercel + backend to Railway
+```
+
+## Getting Help
+
+- EverBee API Docs: Check the PDF provided
+- TypeScript errors: Check types in `src/types/`
+- API errors: Check backend logs
+- Build errors: Check Vite/Node console
+
+---
+
+Remember: This template is designed for speed. Focus on implementing features, not boilerplate. The authentication, API integration, and database are already handled. Just build!
