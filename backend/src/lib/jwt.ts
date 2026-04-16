@@ -8,6 +8,8 @@ export interface JwtPayload {
   userId: string
   email: string
   storeId: string
+  /** EverBee store UUID (Store.storeId) — used to skip repeat OAuth for the same store */
+  everbeeStoreId?: string
 }
 
 export function generateAccessToken(payload: JwtPayload): string {

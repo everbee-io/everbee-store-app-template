@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import mongoose from 'mongoose'
 import { authenticate } from '../middleware/auth'
 import { asyncHandler } from '../middleware/error-handler'
 import { Product, Order } from '../models'
+import { toStoreObjectId } from '../lib/store-id'
 
 const router = Router()
 
@@ -11,7 +11,7 @@ router.use(authenticate)
 // Get dashboard stats
 router.get('/dashboard', asyncHandler(async (req, res) => {
   const { storeId } = req.user!
-  const storeObjectId = new mongoose.Types.ObjectId(storeId)
+  const storeObjectId = toStoreObjectId(storeId)
 
   const [productsCount, ordersCount, revenueResult] = await Promise.all([
     Product.countDocuments({ storeId: storeObjectId }),
@@ -66,7 +66,7 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
 // Get revenue by product
 router.get('/revenue-by-product', asyncHandler(async (req, res) => {
   const { storeId } = req.user!
-  const storeObjectId = new mongoose.Types.ObjectId(storeId)
+  const storeObjectId = toStoreObjectId(storeId)
 
   const products = await Product.find({ storeId: storeObjectId }).limit(10)
 

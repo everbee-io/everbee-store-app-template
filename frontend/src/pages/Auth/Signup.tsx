@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/lib/api-client'
 
@@ -7,6 +7,10 @@ export default function SignupPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ email: '', password: '', name: '' })
+
+  if (typeof window !== 'undefined' && localStorage.getItem('accessToken')) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,6 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+import { getBackendBaseUrl } from './backend-url'
+
+const API_URL = getBackendBaseUrl()
 
 class ApiClient {
   private client: AxiosInstance

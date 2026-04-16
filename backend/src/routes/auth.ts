@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { User, Store } from '../models'
+import { buildTokenPayload } from '../lib/jwt-payload'
 import { generateAccessToken, generateRefreshToken } from '../lib/jwt'
 import { exchangeCodeForToken, buildAuthorizationUrl } from '../lib/everbee-auth'
 import { asyncHandler } from '../middleware/error-handler'
@@ -36,24 +37,18 @@ router.post('/signup', asyncHandler(async (req, res) => {
     storeId: store._id,
   })
 
-  const accessToken = generateAccessToken({
-    userId: user._id.toString(),
-    email: user.email,
-    storeId: user.storeId.toString(),
-  })
+  const tokenPayload = buildTokenPayload(user, store)
 
-  const refreshToken = generateRefreshToken({
-    userId: user._id.toString(),
-    email: user.email,
-    storeId: user.storeId.toString(),
-  })
+  const accessToken = generateAccessToken(tokenPayload)
+
+  const refreshToken = generateRefreshToken(tokenPayload)
 
   res.json({
     user: {
       id: user._id,
       email: user.email,
       name: user.name,
-      storeId: user.storeId,
+      storeId: tokenPayload.storeId,
     },
     accessToken,
     refreshToken,
@@ -80,18 +75,11 @@ router.post('/login', asyncHandler(async (req, res) => {
   }
 
   const store = user.storeId as any
+  const tokenPayload = buildTokenPayload(user, store)
 
-  const accessToken = generateAccessToken({
-    userId: user._id.toString(),
-    email: user.email,
-    storeId: user.storeId.toString(),
-  })
+  const accessToken = generateAccessToken(tokenPayload)
 
-  const refreshToken = generateRefreshToken({
-    userId: user._id.toString(),
-    email: user.email,
-    storeId: user.storeId.toString(),
-  })
+  const refreshToken = generateRefreshToken(tokenPayload)
 
   res.json({
     user: {
@@ -165,11 +153,7 @@ router.get('/callback', asyncHandler(async (req, res) => {
     })
   }
 
-  const accessToken = generateAccessToken({
-    userId: user._id.toString(),
-    email: user.email,
-    storeId: user.storeId.toString(),
-  })
+  const accessToken = generateAccessToken(buildTokenPayload(user, store))
 
   res.redirect(`${process.env.FRONTEND_URL}/auth/success?token=${accessToken}`)
 }))
@@ -211,11 +195,13 @@ router.post('/refresh', asyncHandler(async (req, res) => {
 
   const payload = require('../lib/jwt').verifyToken(refreshToken)
 
-  const accessToken = generateAccessToken({
-    userId: payload.userId,
-    email: payload.email,
-    storeId: payload.storeId,
-  })
+  const user = await User.findById(payload.userId)
+  if (!user) {
+    return res.status(401).json({ error: 'User not found' })
+  }
+
+  const store = await Store.findById(user.storeId)
+  const accessToken = generateAccessToken(buildTokenPayload(user, store))
 
   res.json({ accessToken })
 }))

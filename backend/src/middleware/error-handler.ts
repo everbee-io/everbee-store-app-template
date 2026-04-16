@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction, RequestHandler } from 'express'
 
 export class AppError extends Error {
   statusCode: number
@@ -43,8 +43,14 @@ export function notFound(req: Request, res: Response) {
   })
 }
 
-export function asyncHandler(fn: Function) {
-  return (req: Request, res: Response, next: NextFunction) => {
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<unknown>
+
+export function asyncHandler(fn: AsyncRequestHandler): RequestHandler {
+  return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next)
   }
 }

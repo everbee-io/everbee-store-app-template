@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../lib/jwt'
+import { getStoreMongoIdString } from '../lib/store-id'
 import { User } from '../models'
 
 declare global {
@@ -34,7 +35,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     req.user = {
       userId: user._id.toString(),
       email: user.email,
-      storeId: user.storeId.toString(),
+      storeId: getStoreMongoIdString(user),
     }
 
     next()

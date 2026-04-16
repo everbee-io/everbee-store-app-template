@@ -1,7 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { CheckCircle } from 'lucide-react'
 
 export default function WelcomePage() {
+  // Reload / bare app URL often hits `/` while localStorage still has the session — don't show the marketing screen.
+  if (typeof window !== 'undefined' && localStorage.getItem('accessToken')) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">

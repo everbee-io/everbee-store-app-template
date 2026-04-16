@@ -92,6 +92,23 @@ Once deployed, submit your app to the EverBee Store ecosystem:
    - **OAuth Redirect URI**: `https://your-backend.up.railway.app/api/auth/callback`
 4. Submit for review
 
+### Install / open from the app marketplace (website URL)
+
+When EverBee sends merchants to your **frontend root** with `token`, `store_id`, and `subdomain` (install or “open” after install), the app detects those query parameters and redirects the browser to your **backend** `GET /api/auth/install` with the same query string, which continues the OAuth flow. Register your **App URL** as the Vercel site root (for example `https://your-app.vercel.app`).
+
+### Embedded app surface
+
+For the **Embedded** app type, build a compact admin UI on **`/embedded`** (for example `https://your-app.vercel.app/embedded`). Register that URL in the developer portal. Optional query parameters are shown on the page for debugging.
+
+### Storefront integration (customer-facing)
+
+Starter assets live under **`frontend/public/storefront/`** (`storefront.js`, `storefront.css`). After deploy, submit their public URLs in app settings (JavaScript URL / CSS URL), for example:
+
+- `https://your-app.vercel.app/storefront/storefront.js`
+- `https://your-app.vercel.app/storefront/storefront.css`
+
+Extend the script to use `EverBeeAppAPI` / the POD SDK on product pages as described in EverBee’s storefront documentation.
+
 ## Project Structure
 
 ```
@@ -153,6 +170,8 @@ FRONTEND_URL=http://localhost:3000
 VITE_API_URL=http://localhost:3001
 VITE_APP_NAME=My EverBee App
 ```
+
+On **Vercel**, set `VITE_API_URL` to **only** your backend origin (for example `https://your-service.up.railway.app`), not the whole Railway CLI line—pasting text like `Service domain created: https://...` breaks the install redirect.
 
 ## Tech Stack
 

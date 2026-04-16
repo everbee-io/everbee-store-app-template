@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 
+import { EverBeeInstallRedirect } from './components/EverBeeInstallRedirect'
+
 // Pages
 import WelcomePage from './pages/Welcome'
 import LoginPage from './pages/Auth/Login'
@@ -13,6 +15,7 @@ import OrdersPage from './pages/Orders'
 import OrderDetailPage from './pages/Orders/Detail'
 import AnalyticsPage from './pages/Analytics'
 import SettingsPage from './pages/Settings'
+import EmbeddedPage from './pages/Embedded'
 
 // Layout
 import Layout from './components/Layout'
@@ -21,6 +24,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
     <>
+      <EverBeeInstallRedirect />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<WelcomePage />} />
@@ -28,6 +32,7 @@ function App() {
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/callback" element={<CallbackPage />} />
         <Route path="/auth/success" element={<CallbackPage />} />
+        <Route path="/embedded" element={<EmbeddedPage />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>

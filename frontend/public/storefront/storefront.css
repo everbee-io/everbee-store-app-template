@@ -1,0 +1,11 @@
+/**
+ * Optional storefront styles — submit URL in app settings (CSS URL).
+ * Scope under a class to avoid clashing with merchant themes.
+ */
+.everbee-app-storefront {
+  box-sizing: border-box;
+}
+
+.everbee-app-storefront * {
+  box-sizing: inherit;
+}
