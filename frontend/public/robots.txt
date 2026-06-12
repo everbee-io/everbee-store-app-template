@@ -1,0 +1,28 @@
+# Static fallback for split (Vercel) deploys. On Fly single-origin deploys the
+# backend serves a dynamic robots.txt that honors APP_VISIBILITY.
+# LLM-crawlable by default — AI crawlers welcome. For a private app, replace the
+# body with "User-agent: *\nDisallow: /".
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: *
+Allow: /

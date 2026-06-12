@@ -1,0 +1,16 @@
+# EverBee Store App
+
+> An app built on the EverBee Store platform. Agent-friendly: the full API is
+> described in OpenAPI and wrapped by an MCP server so an LLM can drive it.
+
+Static fallback for split deploys. On Fly single-origin deploys the backend
+serves this dynamically (with the live endpoint list) at /llms.txt.
+
+## Machine interfaces
+- OpenAPI contract: /openapi.json
+- API docs (Swagger): /docs
+- Release notes: /api/release-notes
+- MCP server: see the app's /mcp package
+
+## Auth
+POST /api/auth/login → { accessToken }. Send Authorization: Bearer <token>.

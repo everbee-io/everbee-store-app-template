@@ -5,6 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EverBee Store App</title>
+    <meta name="description" content="An app built on the EverBee Store platform." />
+
+    <!-- LLM-crawlable by default: structured data so AI understands what this is.
+         Keep in sync with the app's real name/description. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EverBee Store App",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "An app built on the EverBee Store platform.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,9 +1,11 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings, LogOut, HelpCircle, Sparkles } from 'lucide-react'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { isEverbeeTeam } = useCurrentUser()
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
@@ -16,6 +18,11 @@ export default function Layout() {
     { path: '/products', icon: Package, label: 'Products' },
     { path: '/orders', icon: ShoppingCart, label: 'Orders' },
     { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/whats-new', icon: Sparkles, label: "What's New" },
+    // How It Works is internal docs — only EverBee staff (@everbee.io) see it.
+    ...(isEverbeeTeam
+      ? [{ path: '/how-it-works', icon: HelpCircle, label: 'How It Works' }]
+      : []),
     { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
