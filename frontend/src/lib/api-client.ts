@@ -163,6 +163,12 @@ class ApiClient {
     const { data } = await this.client.get('/analytics/revenue-by-product')
     return data
   }
+
+  // Release notes (autonomous — generated from git, see scripts/release-notes.mjs)
+  async getReleaseNotes() {
+    const { data } = await this.client.get('/release-notes')
+    return data
+  }
 }
 
 export const api = new ApiClient()

@@ -10,17 +10,29 @@ This template provides a complete full-stack foundation for building apps on the
 - **Backend**: Node.js (Express) with TypeScript
 - **Authentication**: Complete OAuth flow with EverBee Store
 - **Database**: MongoDB Atlas with Mongoose ODM
-- **Pre-built Pages**: Dashboard, products, orders, analytics
+- **Pre-built Pages**: Dashboard, products, orders, analytics, How It Works, What's New
 - **EverBee SDK**: Pre-integrated API client
 - **AI-Ready**: Optimized for Cursor / Claude Code
-- **Demo Data**: Working app out of the box
-- **One-Command Deploy**: Vercel (frontend) + Railway (backend)
+
+### Built-in build standards (see [STANDARDS.md](./STANDARDS.md))
+
+Every app from this template ships these by default — they are definition-of-done:
+
+- **OpenAPI spec** at `/openapi.json` (+ Swagger UI at `/docs`) — the API contract
+- **MCP server** (`mcp/`) that generates tools from the live OpenAPI spec — never drifts
+- **LLM-crawlable by default** — `/llms.txt`, AI-allow `/robots.txt`, `/sitemap.xml`, JSON-LD (`APP_VISIBILITY=private` to opt out)
+- **Autonomous release notes** — generated from git on every deploy, shown on the "What's New" page
+- **How It Works** admin page with a diagram, plain English, and a technical hint
+- **One-command Fly deploy** — single origin (API + UI + OpenAPI/MCP surface on one domain)
 
 ## The Flow
 
 ```
-Fork & Clone  -->  npm run setup  -->  Build with Cursor  -->  npm run deploy  -->  Submit to EverBee
+Fork & Clone  -->  npm run setup  -->  Build with AI  -->  push to GitHub  -->  scripts/deploy-fly.sh  -->  Submit to EverBee
 ```
+
+> Or just say **"new everbee app"** to Claude Code and the `/new-everbee-app`
+> skill scaffolds + renames + enforces the standards for you.
 
 ## Quick Start
 
@@ -72,11 +84,20 @@ Open the project in Cursor and start building:
 
 See [BUILD_WITH_AI.md](./BUILD_WITH_AI.md) for a detailed guide.
 
-### 5. Deploy
+### 5. Deploy (Fly-first)
+
+Commit and push to GitHub first, then:
 
 ```bash
-npm run deploy
+bash scripts/deploy-fly.sh
 ```
+
+This regenerates release notes from git, then deploys a single Fly app serving
+the API, the built UI, and the OpenAPI/MCP/LLM surface from one origin. Your
+EverBee redirect URI becomes `https://<app-name>.fly.dev/api/auth/callback`.
+
+> A legacy split deploy (Vercel + Railway) is still available via
+> `scripts/deploy.sh`, but Fly is the default.
 
 This deploys your frontend to Vercel and backend to Railway, wires up all environment variables, and prints your live URLs.
 

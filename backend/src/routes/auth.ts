@@ -113,6 +113,24 @@ router.get('/install', asyncHandler(async (req, res) => {
   res.redirect(authUrl)
 }))
 
+/**
+ * App uninstall webhook. The EverBee Developer portal REQUIRES a valid
+ * uninstallation URL (it errors if blank), so every app ships this. EverBee
+ * calls it when a store removes the app. Customize the cleanup per app; always
+ * return 200. Store id may arrive in query or body.
+ */
+async function handleUninstall(req: any, res: any) {
+  const sid =
+    req.body?.store_id || req.body?.storeId || req.query?.store_id || req.query?.storeId
+  if (sid) {
+    // TODO per app: pause/clean up this store's data. Keep records for reinstall.
+    await Store.updateOne({ storeId: sid }, { uninstalledAt: new Date() }).catch(() => {})
+  }
+  res.json({ ok: true })
+}
+router.post('/uninstall', asyncHandler(handleUninstall))
+router.get('/uninstall', asyncHandler(handleUninstall))
+
 // EverBee OAuth - Callback
 router.get('/callback', asyncHandler(async (req, res) => {
   const { code, state, error } = req.query

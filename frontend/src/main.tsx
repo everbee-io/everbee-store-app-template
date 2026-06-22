@@ -4,6 +4,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
+import { initAnalytics } from './lib/analytics'
+
+// Product analytics (PostHog) — standing build standard. No-op without a key.
+initAnalytics()
 
 const queryClient = new QueryClient({
   defaultOptions: {

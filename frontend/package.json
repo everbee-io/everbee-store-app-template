@@ -22,7 +22,8 @@
     "zod": "^3.22.4",
     "@hookform/resolvers": "^3.3.2",
     "lucide-react": "^0.294.0",
-    "sonner": "^1.2.0"
+    "sonner": "^1.2.0",
+    "posthog-js": "^1.160.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

@@ -16,10 +16,13 @@ import OrderDetailPage from './pages/Orders/Detail'
 import AnalyticsPage from './pages/Analytics'
 import SettingsPage from './pages/Settings'
 import EmbeddedPage from './pages/Embedded'
+import HowItWorksPage from './pages/HowItWorks'
+import ReleaseNotesPage from './pages/ReleaseNotes'
 
 // Layout
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import EverbeeTeamRoute from './components/EverbeeTeamRoute'
 
 function App() {
   return (
@@ -43,6 +46,11 @@ function App() {
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            {/* How It Works is internal — EverBee staff (@everbee.io) only. */}
+            <Route element={<EverbeeTeamRoute />}>
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+            </Route>
+            <Route path="/whats-new" element={<ReleaseNotesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>
