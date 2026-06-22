@@ -1,8 +1,8 @@
-# START HERE — Building Apps for the OpoShop App Store
+# START HERE — Building Apps for the EverBee Store App Store
 
-**Who this is for:** Brandon — and the Claude Code (or Cursor) instance Brandon hands this repo to.
+**Who this is for:** anyone building an app from this template — and the Claude Code (or Cursor) instance you hand it to.
 
-**The goal:** Build apps on top of the EverBee/OpoShop Store platform and publish them to the OpoShop app store, where any OpoShop merchant can install them. This repo is the starter template. Everything you need to go from zero to a live, published app is in here.
+**The goal:** Build apps on top of the EverBee Store platform (which OpoShop runs on) and publish them to the app store, where any merchant can install them. This repo is the starter template. Everything you need to go from zero to a live, published app is in here.
 
 If you're an AI agent reading this: read this whole file first, then read `CLAUDE.md`, `STANDARDS.md`, and `.cursorrules` in this repo. Those are your standing rules. This file orients you; those files bind you.
 
@@ -37,13 +37,13 @@ Set these up once. They're free or near-free at this stage.
 | 1 | **Node.js 18+** | https://nodejs.org | Runs the app locally |
 | 2 | **Git** | https://git-scm.com | Clone the template, push your app |
 | 3 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` then run `claude` | This is how you build. AI writes the features. |
-| 4 | **GitHub access** | Ask Cody to add you to the `everbee-io` org | The template lives here; you push your apps here |
+| 4 | **GitHub access** | Access to this repo (and wherever you'll host your own app repos) | The template lives here; you push your apps to your own repos |
 | 5 | **MongoDB Atlas** | https://www.mongodb.com/atlas (free M0 cluster) | The app's database. Create a DB user + allow network access from anywhere (0.0.0.0/0), grab the `mongodb+srv://...` connection string |
 | 6 | **EverBee Developer account** | https://dev.everbee.io | Where you register an app and get its Client ID + Secret (the OAuth keys that let merchants log in) |
 | 7 | **Fly.io** | https://fly.io + install `flyctl` (https://fly.io/docs/flyctl/install) | Where the app gets deployed/hosted |
 | 8 | **PostHog** *(optional)* | https://posthog.com (free) | Product analytics. Leave blank locally; wire it before you care about usage data |
 
-You'll also want **a real OpoShop store to test against** — ideally one of our own stores — so you can install your app on it and see it work for real before submitting.
+You'll also want **a real store to test against** so you can install your app on it and see it work for real before submitting.
 
 ---
 
@@ -62,7 +62,7 @@ Then disconnect it from the template's git history and start fresh for your app:
 rm -rf .git && git init
 ```
 
-(Later, create a new repo under `everbee-io` and push to it.)
+(Later, create a new repo for your app and push to it.)
 
 ---
 
@@ -108,10 +108,10 @@ bash scripts/deploy-fly.sh
 It regenerates the release notes from git, creates the Fly app, prompts you for the secrets (Mongo URI, EverBee Client ID/Secret), deploys, and prints your live URLs.
 
 ### Step 6 — Submit to the app store
-Back on dev.everbee.io, finish the listing and hit Submit. Once approved, any OpoShop merchant can install it.
+Back on dev.everbee.io, finish the listing and hit Submit. Once approved, any merchant can install it.
 
 ### Step 7 — Test it for real
-Install your app on a real OpoShop store and click through it as a merchant would before you consider it done. (Cody's rule: dogfood on a real store first.)
+Install your app on a real store and click through it as a merchant would before you consider it done. Dogfood on a real store first.
 
 ---
 
@@ -172,14 +172,14 @@ bash scripts/deploy-fly.sh   # deploy to Fly
 ## When you get stuck
 
 - **App/feature building:** ask your Claude Code. It has this whole repo as context.
-- **EverBee Store API, OAuth, app registration, anything platform-side:** **Priyam** and **Pawan** are the EverBee engineering contacts. They handle Store API access, OAuth/Client ID issues, and app approval. Route platform questions to them (through Cody).
-- **What to build / priorities:** Cody.
+- **EverBee Store API, OAuth, app registration, anything platform-side:** **Priyam** and **Pawan** are the EverBee engineering contacts. They handle Store API access, OAuth/Client ID issues, and app approval. Route platform questions to them.
+- **What to build / priorities:** your team lead / product owner.
 
 ---
 
 ## For the AI agent reading this
 
-You've been handed this repo to help Brandon build and publish apps on the OpoShop store. Operating instructions:
+You've been handed this repo to help build and publish apps on the EverBee Store app store. Operating instructions:
 
 1. Read `CLAUDE.md`, `STANDARDS.md`, and `.cursorrules` now. They override your defaults.
 2. The 7 standards above are the definition of done. When you add or change an endpoint, update `backend/src/openapi.ts` in the same change — the MCP layer depends on it. When you change how the app works, update the "How It Works" page.
